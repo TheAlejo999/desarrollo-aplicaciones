@@ -3,7 +3,7 @@ import 'models.dart';
 double totalGeneral(List<Pedido> pedidos) {
   return pedidos.fold(0, (sum, pedido) => sum + pedido.total);
 }
-
+ 
 List<Pedido> pedidosPorEstado(List<Pedido> pedidos, Estado estado) {
   return pedidos.where((pedido) => pedido.estado == estado).toList();
 }
