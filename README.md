@@ -14,6 +14,56 @@
 - `total` se calcula a partir de los subtotales con `fold`, por lo que no se puede desincronizar de las líneas del pedido.
 - Los nombres de las clases y propiedades representan conceptos del dominio y no detalles de implementación.
 
+**Codigo**
+
+```dart
+enum Categoria {
+  electronica, hogar, ropa, alimentos, otros
+}
+
+enum Estado {
+  pendiente, enviado, entregado, cancelado
+}
+
+class Producto {
+  final String nombre;
+  final double precio;
+  final Categoria categoria;
+
+  Producto({
+    required this.nombre,
+    required this.precio,
+    required this.categoria,
+  }) : assert(precio >= 0, 'El precio no puede ser negativo');
+}
+
+class LineaPedido {
+  final Producto producto;
+  final int cantidad;
+
+  LineaPedido({
+    required this.producto,
+    required this.cantidad,
+  }) : assert(cantidad > 0, 'La cantidad debe ser un número positivo');
+
+  double get subtotal => producto.precio * cantidad;
+}
+
+class Pedido {
+  final List<LineaPedido> lineas;
+  final DateTime fecha;
+  final Estado estado;
+
+  Pedido({
+    required this.lineas,
+    required this.fecha,
+    required this.estado,
+  }) : assert(lineas.isNotEmpty, 'El pedido debe contener al menos una línea de pedido');
+
+  double get total => lineas.fold(0, (sum, linea) => sum + linea.subtotal);
+}
+```
+
 ### Observaciones de la revisión
 
 - Las precondiciones están ubicadas en los constructores, cerca de los datos que validan.
@@ -33,6 +83,55 @@
 - `totalPorCategoria` agrupa los subtotales por categoría y devuelve un mapa vacío cuando no hay pedidos.
 - Las consultas usan métodos de colección como `fold`, `where`, `expand`, `map`, `toSet` y `reduce`; no se usan bucles con índice.
 
+```dart
+import 'models.dart';
+
+double totalGeneral(List<Pedido> pedidos) {
+  return pedidos.fold(0, (sum, pedido) => sum + pedido.total);
+}
+ 
+List<Pedido> pedidosPorEstado(List<Pedido> pedidos, Estado estado) {
+  return pedidos.where((pedido) => pedido.estado == estado).toList();
+}
+
+Producto? productoMasPedido(List<Pedido> pedidos) {
+  final conteo = <Producto, int>{};
+
+  for (final pedido in pedidos) {
+    for (final linea in pedido.lineas) {
+      conteo[linea.producto] = (conteo[linea.producto] ?? 0) + 1;
+    }
+  }
+
+  if (conteo.isEmpty) return null;
+
+  return conteo.keys.reduce(
+    (max, producto) => conteo[producto]! > conteo[max]! ? producto : max,
+  );
+}
+
+Pedido? pedidoMasReciente(List<Pedido> pedidos) {
+  if (pedidos.isEmpty) return null;
+  return pedidos.reduce((a, b) => a.fecha.isAfter(b.fecha) ? a : b);
+}
+
+Set<Categoria> categoriasDisponibles(List<Pedido> pedidos) {
+  return pedidos.expand((pedido) => pedido.lineas.map((linea) => linea.producto.categoria)).toSet();
+}
+
+Map<Categoria, double> totalPorCategoria(List<Pedido> pedidos) {
+  final totals = <Categoria, double>{};
+
+  for (final pedido in pedidos) {
+    for (final linea in pedido.lineas) {
+      totals[linea.producto.categoria] = (totals[linea.producto.categoria] ?? 0) + linea.subtotal;
+    }
+  }
+
+  return totals;
+}
+```
+
 ### Observaciones de la revisión de consultas
 
 - En el caso de que las funciones no obtenga un resultado estas declaran un tipo nullable (`Producto?` y `Pedido?`).
@@ -40,6 +139,16 @@
 - `productoMasPedido` cuenta líneas de pedido, no unidades de cantidad, porque la orden pide el producto que aparece en más líneas.
 - `pedidoMasReciente` compara fechas sin ordenar ni mutar la lista recibida.
 - `totalPorCategoria` suma `linea.subtotal`, respetando la responsabilidad del modelo para calcular los valores derivados.
+
+**Resultado de ejecucion**
+totalGeneral: 1850
+pedidosPorEstado(entregado): 1 pedido(s)
+productoMasPedido: Laptop
+pedidoMasReciente: 2026-06-01 00:00:00.000
+categoriasDisponibles: {Categoria.electronica, Categoria.hogar}
+totalPorCategoria: {Categoria.electronica: 1700, Categoria.hogar: 150}
+
+ Todas las pruebas pasaron
 
 ## Errores corregidos durante la sesión
 
