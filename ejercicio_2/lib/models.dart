@@ -19,9 +19,27 @@ class Producto {
 }
 
 class LineaPedido {
+  final Producto producto;
+  final int cantidad;
 
+  LineaPedido({
+    required this.producto,
+    required this.cantidad,
+  }) : assert(cantidad > 0, 'La cantidad debe ser un número positivo');
+
+  double get subtotal => producto.precio * cantidad;
 }
 
 class Pedido {
+  final List<LineaPedido> lineas;
+  final DateTime fecha;
+  final Estado estado;
 
+  Pedido({
+    required this.lineas,
+    required this.fecha,
+    required this.estado,
+  }) : assert(lineas.length >= 0);
+
+  double get total => lineas.fold(0, (sum, linea) => sum + linea.subtotal);
 }

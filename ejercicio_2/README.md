@@ -1,2 +1,5 @@
-A sample command-line application with an entrypoint in `bin/`, library code
-in `lib/`, and example unit test in `test/`.
+# Ejercicio 2 - 4/09/2026
+
+**Participantes: Diego Orellana 20245281 y Roberto Milan 20245436**
+
+**Contenido**
