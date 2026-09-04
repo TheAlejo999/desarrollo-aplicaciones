@@ -13,25 +13,20 @@ Producto? productoMasPedido(List<Pedido> pedidos) {
 
   for (final pedido in pedidos) {
     for (final linea in pedido.lineas) {
-      conteo[linea.producto] = (conteo[linea.producto] ?? 0) + linea.cantidad;
+      conteo[linea.producto] = (conteo[linea.producto] ?? 0) + 1;
     }
   }
 
-  if (conteo.isEmpty) {
-    return null;
-  }
+  if (conteo.isEmpty) return null;
 
-  final producto = conteo.keys.reduce((max, producto) => conteo[producto]! > conteo[max]! ? producto : max);
-  return producto;
+  return conteo.keys.reduce(
+    (max, producto) => conteo[producto]! > conteo[max]! ? producto : max,
+  );
 }
 
 Pedido? pedidoMasReciente(List<Pedido> pedidos) {
-  if (pedidos.isEmpty) {
-    return null;
-  }
-
-  pedidos.sort((a, b) => b.fecha.compareTo(a.fecha));
-  return pedidos.first;
+  if (pedidos.isEmpty) return null;
+  return pedidos.reduce((a, b) => a.fecha.isAfter(b.fecha) ? a : b);
 }
 
 Set<Categoria> categoriasDisponibles(List<Pedido> pedidos) {
