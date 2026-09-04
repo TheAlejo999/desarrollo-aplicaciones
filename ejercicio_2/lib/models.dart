@@ -39,7 +39,7 @@ class Pedido {
     required this.lineas,
     required this.fecha,
     required this.estado,
-  }) : assert(lineas.length >= 0);
+  }) : assert(lineas.isNotEmpty, 'El pedido debe contener al menos una línea de pedido');
 
   double get total => lineas.fold(0, (sum, linea) => sum + linea.subtotal);
 }
