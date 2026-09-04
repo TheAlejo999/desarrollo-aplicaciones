@@ -2,7 +2,8 @@ import 'models.dart';
 import 'consultas.dart';
 
 
-// Generado por Claude para cubrir los casos de consultas
+// Generado por Claude para cubrir los casos de consultas probados en DartPad, solo para informar como se
+// probaron las funciones.
 void main() {
   final laptop = Producto(nombre: 'Laptop', precio: 800, categoria: Categoria.electronica);
   final mouse = Producto(nombre: 'Mouse', precio: 20, categoria: Categoria.electronica);
